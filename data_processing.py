@@ -17,13 +17,13 @@ def load_data():
 
 
 
-def clean_data(df):
-    if df is None:
-        print("Shit didnt get real as dataset didnt find")
-        return None
-
-    if 'Series_title' in df.columns:
-        df['year']
+# def clean_data(df):
+#     if df is None:
+#         print("Shit didnt get real as dataset didnt find")
+#         return None
+#
+#     if 'Series_title' in df.columns:
+#         df['year']
 
 if __name__ == "__main__":
     data = load_data()

@@ -7,54 +7,94 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <!-- 3D Background -->
+    <canvas id="three-canvas"></canvas>
+
+    <!-- Main Container -->
     <div class="container">
-        <header>
-            <h1>🎬 Movie Recommendation System</h1>
-            <p>Get personalized movie recommendations instantly!</p>
-        </header>
-
-        <main>
-            <form id="recommendation-form">
-                <div class="form-group">
-                    <label for="user_id">Enter Your User ID:</label>
-                    <input type="text" id="user_id" name="user_id" placeholder="E.g., 123" required>
-                </div>
-                <button type="submit">Get Recommendations</button>
-            </form>
-
-            <div id="recommendations" class="recommendations hidden">
-                <h2>Your Recommendations</h2>
-                <ul id="recommendation-list"></ul>
-            </div>
-        </main>
+        <h1>🎬 Movie Recommendation System</h1>
+        <p>Find movies by title, genre, or year!</p>
+        <form id="search-form">
+            <input type="text" id="search_query" name="search_query" placeholder="Enter a movie name, genre, or year..." required>
+            <button type="submit">Get Recommendations</button>
+        </form>
+        <div id="recommendations" class="hidden">
+            <h2>Recommended Movies:</h2>
+            <div id="recommendation-list"></div>
+        </div>
     </div>
 
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
     <script>
-        const form = document.querySelector('#recommendation-form');
+        // THREE.js for Background Animation
+        const canvas = document.querySelector('#three-canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Create Stars
+        function createStar() {
+            const geometry = new THREE.SphereGeometry(0.1, 24, 24);
+            const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const star = new THREE.Mesh(geometry, material);
+            const [x, y, z] = Array(3).fill().map(() => THREE.MathUtils.randFloatSpread(100));
+            star.position.set(x, y, z);
+            scene.add(star);
+        }
+
+        Array(200).fill().forEach(createStar);
+
+        camera.position.z = 30;
+
+        // Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            scene.rotation.y += 0.002;
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Responsive Canvas
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        });
+
+        // Search Form Logic
+        const form = document.querySelector('#search-form');
         const recommendationsDiv = document.querySelector('#recommendations');
         const recommendationList = document.querySelector('#recommendation-list');
 
         form.onsubmit = async (e) => {
             e.preventDefault();
-            const userId = document.querySelector('#user_id').value;
+            const query = document.querySelector('#search_query').value;
 
-            // Show loading state
-            recommendationsDiv.classList.add('hidden');
-            recommendationList.innerHTML = `<li>Loading...</li>`;
+            // Show loading message
+            recommendationsDiv.classList.remove('hidden');
+            recommendationList.innerHTML = `<p>Loading...</p>`;
 
             // Fetch recommendations
             const response = await fetch('/recommend', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `user_id=${userId}`,
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `search_query=${query}`,
             });
             const recommendations = await response.json();
 
-            // Update recommendations
-            recommendationList.innerHTML = recommendations.map(movie => `<li>${movie}</li>`).join('');
-            recommendationsDiv.classList.remove('hidden');
+            // Display recommendations
+            recommendationList.innerHTML = recommendations.map(movie => `
+                <div class="movie-card">
+                    <img src="${movie.image_url}" alt="${movie.title}" />
+                    <div class="movie-info">
+                        <h3>${movie.title}</h3>
+                    </div>
+                </div>
+            `).join('');
         };
     </script>
 </body>
