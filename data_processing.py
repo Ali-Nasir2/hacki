@@ -26,5 +26,4 @@ def clean_data(df):
         df['year']
 
 if __name__ == "__main__":
-    data = load_data()
 
