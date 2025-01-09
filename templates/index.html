@@ -27,7 +27,7 @@
     <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
     <script>
-        // THREE.js for Background Animation
+        // THREE.js for Background Animation with Mouse Interaction
         const canvas = document.querySelector('#three-canvas');
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -36,6 +36,7 @@
         document.body.appendChild(renderer.domElement);
 
         // Create Stars
+        const stars = [];
         function createStar() {
             const geometry = new THREE.SphereGeometry(0.1, 24, 24);
             const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
@@ -43,16 +44,41 @@
             const [x, y, z] = Array(3).fill().map(() => THREE.MathUtils.randFloatSpread(100));
             star.position.set(x, y, z);
             scene.add(star);
+            stars.push(star); // Add to the array for interaction
         }
 
-        Array(200).fill().forEach(createStar);
+        Array(700).fill().forEach(createStar);
 
         camera.position.z = 30;
+
+        // Mouse Interaction
+        const mouse = new THREE.Vector2();
+        document.addEventListener('mousemove', (event) => {
+            // Normalize mouse position to range [-1, 1]
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        });
 
         // Animation Loop
         function animate() {
             requestAnimationFrame(animate);
+
+            // Rotate scene slightly
             scene.rotation.y += 0.002;
+
+            // Update star positions to move away from the mouse
+            stars.forEach((star) => {
+                const dx = mouse.x * 50 - star.position.x; // Distance from mouse X
+                const dy = mouse.y * 50 - star.position.y; // Distance from mouse Y
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < 10) {
+                    const force = 1 / distance; // Force weakens with distance
+                    star.position.x -= dx * force * 0.1;
+                    star.position.y -= dy * force * 0.1;
+                }
+            });
+
             renderer.render(scene, camera);
         }
 
@@ -92,7 +118,7 @@
                     <img src="${movie.image_url}" alt="${movie.title}" />
                     <div class="movie-info">
                         <h3>${movie.title}</h3>
-                    </div>
+                    </div>a
                 </div>
             `).join('');
         };
