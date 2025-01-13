@@ -84,14 +84,14 @@ button:hover {
 #recommendation-list {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: space-between;
     gap: 15px;
 }
 
 .movie-card {
     display: inline-block;
-    margin: 10px;
-    width: 200px; /* Adjusted size */
+    margin: 10px 10px;
+    width: 40%; /* Adjusted size */
     text-align: center;
     transform: perspective(1000px) rotateY(0deg);
     transition: transform 0.5s ease, box-shadow 0.5s ease;
