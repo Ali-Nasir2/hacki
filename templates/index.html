@@ -15,6 +15,7 @@
         <h1>🎬 Movie Recommendation System</h1>
         <p>Find movies by title, genre, or year!</p>
         <form id="search-form">
+            <label for="search_query" style="display: none;">Search for a movie:</label>
             <input type="text" id="search_query" name="search_query" placeholder="Enter a movie name, genre, or year..." required>
             <button type="submit">Get Recommendations</button>
         </form>
@@ -27,7 +28,7 @@
     <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
     <script>
-        // THREE.js for Background Animation with Mouse Interaction
+        // THREE.js Background Logic
         const canvas = document.querySelector('#three-canvas');
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -35,7 +36,6 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Create Stars
         const stars = [];
         function createStar() {
             const geometry = new THREE.SphereGeometry(0.1, 24, 24);
@@ -44,36 +44,30 @@
             const [x, y, z] = Array(3).fill().map(() => THREE.MathUtils.randFloatSpread(100));
             star.position.set(x, y, z);
             scene.add(star);
-            stars.push(star); // Add to the array for interaction
+            stars.push(star);
         }
 
         Array(2950).fill().forEach(createStar);
 
         camera.position.z = 30;
 
-        // Mouse Interaction
         const mouse = new THREE.Vector2();
         document.addEventListener('mousemove', (event) => {
-            // Normalize mouse position to range [-1, 1]
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
         });
 
-        // Animation Loop
         function animate() {
             requestAnimationFrame(animate);
-
-            // Rotate scene slightly
             scene.rotation.y += 0.002;
 
-            // Update star positions to move away from the mouse
             stars.forEach((star) => {
-                const dx = mouse.x * 50 - star.position.x; // Distance from mouse X
-                const dy = mouse.y * 50 - star.position.y; // Distance from mouse Y
+                const dx = mouse.x * 50 - star.position.x;
+                const dy = mouse.y * 50 - star.position.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
 
                 if (distance < 10) {
-                    const force = 1 / distance; // Force weakens with distance
+                    const force = 1 / distance;
                     star.position.x -= dx * force * 0.1;
                     star.position.y -= dy * force * 0.1;
                 }
@@ -84,14 +78,13 @@
 
         animate();
 
-        // Responsive Canvas
         window.addEventListener('resize', () => {
             renderer.setSize(window.innerWidth, window.innerHeight);
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
         });
 
-        // Search Form Logic
+        // Fetch and Display Recommendations
         const form = document.querySelector('#search-form');
         const recommendationsDiv = document.querySelector('#recommendations');
         const recommendationList = document.querySelector('#recommendation-list');
@@ -100,11 +93,9 @@
             e.preventDefault();
             const query = document.querySelector('#search_query').value;
 
-            // Show loading message
             recommendationsDiv.classList.remove('hidden');
             recommendationList.innerHTML = `<p>Loading...</p>`;
 
-            // Fetch recommendations
             const response = await fetch('/recommend', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -112,13 +103,17 @@
             });
             const recommendations = await response.json();
 
-            // Display recommendations
+            if (!recommendations || recommendations.error) {
+                recommendationList.innerHTML = `<p>${recommendations?.error || 'No recommendations found!'}</p>`;
+                return;
+            }
+
             recommendationList.innerHTML = recommendations.map(movie => `
                 <div class="movie-card">
-                    <img src="${movie.image_url}" alt="${movie.title}" />
+                    <img src="${movie.poster}" alt="${movie.title}" loading="lazy" />
                     <div class="movie-info">
                         <h3>${movie.title}</h3>
-                    </div>a
+                    </div>
                 </div>
             `).join('');
         };
