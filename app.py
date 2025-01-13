@@ -81,39 +81,46 @@ def recommend():
     # Get the movie name from the form
     movie_name = request.form.get('search_query', '').lower()
 
-    # Title-Based Search
+    # Track unique titles
+    unique_titles = set()
+
+    # Partial Title-Based Search
     title_matches = df[df['Series_Title'].str.lower().str.contains(movie_name, na=False)]
     recommendations = []
     if not title_matches.empty:
         for _, row in title_matches.iterrows():
-            poster_url = get_movie_poster(row['Series_Title']) or row['Poster_Link']
-            recommendations.append({
-                "title": row['Series_Title'],
-                "overview": row['Overview'],
-                "poster": poster_url
-            })
+            if row['Series_Title'] not in unique_titles:
+                poster_url = get_movie_poster(row['Series_Title']) or row['Poster_Link']
+                recommendations.append({
+                    "title": row['Series_Title'],
+                    "overview": row['Overview'],
+                    "poster": poster_url
+                })
+                unique_titles.add(row['Series_Title'])
 
     # If fewer than 10 title matches, expand to feature-based search
     if len(recommendations) < 10:
-        # Find the movie index
+        # Find a similar movie index
         try:
-            movie_idx = df[df['Series_Title'].str.lower() == movie_name].index[0]
+            similar_movie_idx = df[df['Series_Title'].str.lower().str.contains(movie_name, na=False)].index[0]
         except IndexError:
             return jsonify({"error": "Movie not found! Please try another title."})
 
         # Get similarity scores
-        similarity_scores = list(enumerate(similarity_matrix[movie_idx]))
+        similarity_scores = list(enumerate(similarity_matrix[similar_movie_idx]))
         similarity_scores = sorted(similarity_scores, key=lambda x: x[1], reverse=True)
 
         # Add recommendations based on features
         for i in similarity_scores[1:21]:  # Skip the first one (itself)
             movie = df.iloc[i[0]]
-            poster_url = get_movie_poster(movie['Series_Title']) or movie['Poster_Link']
-            recommendations.append({
-                "title": movie['Series_Title'],
-                "overview": movie['Overview'],
-                "poster": poster_url
-            })
+            if movie['Series_Title'] not in unique_titles:
+                poster_url = get_movie_poster(movie['Series_Title']) or movie['Poster_Link']
+                recommendations.append({
+                    "title": movie['Series_Title'],
+                    "overview": movie['Overview'],
+                    "poster": poster_url
+                })
+                unique_titles.add(movie['Series_Title'])
 
     # Limit to top 20 recommendations
     recommendations = recommendations[:20]
