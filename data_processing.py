@@ -2,10 +2,8 @@ import pandas as pd
 
 
 def load_data():
-    """
-    Load the dataset from a CSV file.
-    """
-    file_path = 'models/imdb_top_1000.csv'  # Update path if necessary
+
+    file_path = 'models/imdb_top_1000.csv'
     try:
         df = pd.read_csv(file_path)
         print(f"Dataset loaded with {df.shape[0]} rows and {df.shape[1]} columns.")
@@ -25,18 +23,15 @@ def clean_data(df):
         print("Dataset not found. Cannot clean data.")
         return None
 
-    # Ensure critical columns exist
     if 'Series_Title' not in df.columns or 'Overview' not in df.columns:
         print("Error: Missing required columns ('Series_Title', 'Overview').")
         return None
 
-    # Drop rows with missing Overview or Series_Title
+
     df = df.dropna(subset=['Series_Title', 'Overview'])
 
-    # Clean Overview: convert to lowercase
     df['Overview'] = df['Overview'].str.lower()
 
-    # Clean Series_Title: strip extra spaces
     df['Series_Title'] = df['Series_Title'].str.strip()
 
     print("Data cleaning complete. Sample Data:")
