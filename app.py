@@ -122,8 +122,8 @@ def recommend():
                 })
                 unique_titles.add(movie['Series_Title'])
 
-    # Limit to top 20 recommendations
-    recommendations = recommendations[:20]
+    # Limit to top 12 recommendations
+    recommendations = recommendations[:12]
 
     return jsonify(recommendations)
 
