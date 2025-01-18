@@ -91,7 +91,15 @@ Inception---inception a mind-bending thriller leonardo joseph sci-fi
 
 
          tfidf = TfidfVectorizer(stop_words='english')
- Creates a vector and removes the unimportant words in english like,the,as,for
+ Creates a vector and removes the unimportant words in english like,the,is etc
+
+          tfidf_matrix = tfidf.fit_transform(df['Combined_Features'])
+Gives the combined features dataset to the matrix which uses the tfidt transform function to change the english into numerical that can be computed afterwards
+
+          similarity_matrix = cosine_similarity(tfidf_matrix, tfidf_matrix)
+Makes a similarity 2D matrix, showing the relation between the movies with i rows and j columns. 
+
+
 
 
 
