@@ -99,6 +99,30 @@ Gives the combined features dataset to the matrix which uses the tfidt transform
           similarity_matrix = cosine_similarity(tfidf_matrix, tfidf_matrix)
 Makes a similarity 2D matrix, showing the relation between the movies with i rows and j columns. 
 
+    @app.route('/')
+    def home():
+    """
+    Render the homepage.
+    """
+    return render_template('index.html')
+
+Tells the main route of the app and uses the flask function of render_template to render the index.html page which displays it on the client side.
+
+    @app.route('/recommend', methods=['POST'])
+This is also a app route which will only be called if the client requests the recommendations and thus is only restricted to deal with the POST requests.
+
+         if df is None:
+        return jsonify({"error": "Dataset is not available. Please check your data file."})
+If the dataset is empty after all the calculations then give an error.
+
+
+         movie_name = request.form.get('search_query', '').lower()
+This stores the movie name entered to be searched in a key type of structor that will be used to search the movie in the database   
+
+
+         unique_titles = set()
+
+Just makes a set, A set is used for unique values
 
 
 

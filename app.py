@@ -72,9 +72,7 @@ def home():
 
 @app.route('/recommend', methods=['POST'])
 def recommend():
-    """
-    Handle movie recommendations and fetch posters dynamically using TMDb API.
-    """
+
     if df is None:
         return jsonify({"error": "Dataset is not available. Please check your data file."})
 
