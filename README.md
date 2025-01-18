@@ -124,6 +124,9 @@ This stores the movie name entered to be searched in a key type of structor that
 
 Just makes a set, A set is used for unique values
 
+        title_matches = df[df['Series_Title'].str.lower().str.contains(movie_name, na=False)]
+Just add any title that contains the title of the movie searched like if Harry potter is searched the titles like Harry potter and deathly hallows will be saved
+
 
 
 
